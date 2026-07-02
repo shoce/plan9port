@@ -151,8 +151,8 @@ unset MKSHELL
 
 cd src
 if $dobuild; then
-	echo "* Building mk..."
-	../dist/buildmk 2>&1 | sed 's/^[+] //'
+	#echo "* Building mk..."
+	#../dist/buildmk 2>&1 | sed 's/^[+] //'
 
 	if [ ! -x ../bin/mk ]; then
 		echo "* Error: mk failed to build."
@@ -203,7 +203,7 @@ if $doinstall; then
 		(
 			cd $PLAN9/dist
 			echo cd `pwd`';' mk man
-			mk man
+			#mk man
 		)
 	fi
 
