@@ -257,6 +257,9 @@ bin/yuv
 bin/zcat
 bin/zerotrunc
 bin/zip
+bin/devdrawclient
+bin/devdrawserver
+bin/dialdevdraw
 config
 dict/
 install.log
