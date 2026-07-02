@@ -251,7 +251,7 @@ rpc_attach(Client *c, char *label, char *winsize)
 
 	LOG(@"makewin(%s)", s);
 	if(s == nil || *s == '\0' || parsewinsize(s, &wr, &set) < 0) {
-		wr = Rect(0, 0, sr.size.width*2/3, sr.size.height*2/3);
+		wr = Rect(0, 0, sr.size.width, sr.size.height);
 		set = 0;
 	}
 
