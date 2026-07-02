@@ -898,6 +898,11 @@ texttype(Text *t, Rune r)
 		typecommit(t);
 		fontx(&t->w->body, nil, nil, FALSE, XXX, nil, 0);
 		return;
+	case Kcmd+Kshift+'d': // clear
+	case '':
+		typecommit(t);
+		textdelete(t, 0, t->file->b.nc, TRUE);
+		return;
 	case Kcmd+'n': // new
 		typecommit(t);
 		new(t, t, nil, 0, 0, nil, 0);
