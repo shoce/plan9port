@@ -894,6 +894,10 @@ texttype(Text *t, Rune r)
 		typecommit(t);
 		fontx(&t->w->body, nil, nil, FALSE, XXX, nil, 0);
 		return;
+	case Kcmd+'n': // new
+		typecommit(t);
+		new(t, t, nil, 0, 0, nil, 0);
+		return;
 	case '\n':
 		if(t->w->autoindent){
 			/* find beginning of previous line using backspace code */
