@@ -327,18 +327,10 @@ bytetorune(char *s, int *ip)
 int
 isalnum(Rune c)
 {
-	/*
-	 * Hard to get absolutely right.  Use what we know about ASCII
-	 * and assume anything above the Latin control characters is
-	 * potentially an alphanumeric.
-	 */
-	if(c <= ' ')
-		return FALSE;
-	if(0x7F<=c && c<=0xA0)
-		return FALSE;
-	if(utfrune("!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", c))
-		return FALSE;
-	return TRUE;
+	if('A'<=c && c<='Z') return TRUE;
+	if('a'<=c && c<='z') return TRUE;
+	if('0'<=c && c<='9') return TRUE;
+	return FALSE;
 }
 
 int
