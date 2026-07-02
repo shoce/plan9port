@@ -550,33 +550,28 @@ runeclass(Rune r)
 	return RCOTHER;
 }
 
+const int CTRL_H = 0x08;
+const int CTRL_W = 0x17;
+const int CTRL_U = 0x15;
+
 int
 textbswidth(Text *t, Rune c)
 {
-	uint q, eq;
-	Rune r;
-	int skipping;
-
+	uint q;
+	Rune r1, r;
 	/* there is known to be at least one character to erase */
-	if(c == 0x08)	/* ^H: erase character */
+	if(c == CTRL_H) // erase character
 		return 1;
 	q = t->q0;
-	skipping = TRUE;
+	if(q>0) q--;
 	while(q > 0){
-		r = textreadc(t, q-1);
-		if(r == '\n'){		/* eat at most one more character */
-			if(q == t->q0)	/* eat the newline */
-				--q;
-			break;
-		}
-		if(c == 0x17){
-			eq = isalnum(r);
-			if(eq && skipping)	/* found one; stop skipping */
-				skipping = FALSE;
-			else if(!eq && !skipping)
-				break;
-		}
-		--q;
+		r = 0;
+		if(1<q && q<t->file->b.nc)
+			r = textreadc(t, q);
+		r1 = textreadc(t, q-1);
+		if(c==CTRL_U && (runeclass(r1)==RCNEWLINE || runeclass(r)==RCNEWLINE)){ break; }
+		if(c==CTRL_W && (runeclass(r1)!=runeclass(r))){ break; }
+		q--;
 	}
 	return t->q0-q;
 }
@@ -686,7 +681,6 @@ void
 texttype(Text *t, Rune r)
 {
 	uint q0, q1;
-	int nnb, nb, n, i;
 	int nnb, nb, n, i, li;
 	int nr;
 	Rune *rp;
@@ -928,12 +922,22 @@ texttype(Text *t, Rune r)
 			typecommit(t);
 		t->iq1 = t->q0;
 		return;
-	case 0x08:	/* ^H: erase character */
-	case 0x15:	/* ^U: erase line */
-	case 0x17:	/* ^W: erase word */
-		if(t->q0 == 0)	/* nothing to erase */
+	// erase
+		Rune wc;
+	case Kcmd+'e': // erase character
+	case CTRL_H:
+		wc = CTRL_H;
+		goto Erase0;
+	case Kcmd+'w': // erase word
+		wc = CTRL_W;
+		goto Erase0;
+	case Kcmd+'d': // erase line
+		wc = CTRL_U;
+		goto Erase0;
+		Erase0:
+		if(t->q0 == 0) // nothing to erase
 			return;
-		nnb = textbswidth(t, r);
+		nnb = textbswidth(t, wc);
 		q1 = t->q0;
 		q0 = q1-nnb;
 		/* if selection is at beginning of window, avoid deleting invisible text */
@@ -988,7 +992,7 @@ texttype(Text *t, Rune r)
 	case '\n':
 		if(t->w->autoindent){
 			/* find beginning of previous line using backspace code */
-			nnb = textbswidth(t, 0x15); /* ^U case */
+			nnb = textbswidth(t, CTRL_U); // ^U case
 			rp = runemalloc(nnb + 1);
 			nr = 0;
 			rp[nr++] = r;
