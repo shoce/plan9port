@@ -98,7 +98,6 @@ rpc_shutdown(void)
 
 	sm = [NSMenu new];
 	[sm addItemWithTitle:@"Toggle Full Screen" action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
-	[sm addItemWithTitle:@"Hide" action:@selector(hide:) keyEquivalent:@"h"];
 	[sm addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
 	m = [NSMenu new];
 	[m addItemWithTitle:@"DEVDRAW" action:NULL keyEquivalent:@""];
