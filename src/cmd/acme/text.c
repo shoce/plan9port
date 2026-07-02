@@ -532,6 +532,24 @@ textreadc(Text *t, uint q)
 	return r;
 }
 
+enum{ RCNEWLINE, RCSPACE, RCALNUM, RCOTHER, };
+
+int
+runeclass(Rune r)
+{
+	switch(r){
+	case '\r':
+	case '\n':
+		return RCNEWLINE;
+	case ' ':
+	case '\t':
+		return RCSPACE;
+	}
+	if(isalnum(r))
+		return RCALNUM;
+	return RCOTHER;
+}
+
 int
 textbswidth(Text *t, Rune c)
 {
@@ -669,6 +687,7 @@ texttype(Text *t, Rune r)
 {
 	uint q0, q1;
 	int nnb, nb, n, i;
+	int nnb, nb, n, i, li;
 	int nr;
 	Rune *rp;
 	Text *u;
@@ -747,21 +766,6 @@ texttype(Text *t, Rune r)
 		} else
 			textshow(t, t->file->b.nc, t->file->b.nc, FALSE);
 		return;
-	case 0x01:	/* ^A: beginning of line */
-		typecommit(t);
-		/* go to where ^U would erase, if not already at BOL */
-		nnb = 0;
-		if(t->q0>0 && textreadc(t, t->q0-1)!='\n')
-			nnb = textbswidth(t, 0x15);
-		textshow(t, t->q0-nnb, t->q0-nnb, TRUE);
-		return;
-	case 0x05:	/* ^E: end of line */
-		typecommit(t);
-		q0 = t->q0;
-		while(q0<t->file->b.nc && textreadc(t, q0)!='\n')
-			q0++;
-		textshow(t, q0, q0, TRUE);
-		return;
 	case Kcmd+Kshift+'u': // begin
 	case '':
 		typecommit(t);
@@ -772,6 +776,70 @@ texttype(Text *t, Rune r)
 		typecommit(t);
 		textshow(t, t->file->b.nc, t->file->b.nc, TRUE);
 		return;
+	case Kcmd+'u': // cursor pgup
+		typecommit(t);
+		if(t->q0<=0) return;
+		q0 = t->q0;
+		li = 0;
+		while(q0>0) {
+			if(runeclass(textreadc(t, q0-1))==RCNEWLINE)
+				li++;
+			if(li>6) break;
+			q0--;
+		}
+		textshow(t, q0, q0, TRUE);
+		return;
+	case Kcmd+'i': // cursor pgdown
+		typecommit(t);
+		if(t->q0>=t->file->b.nc) return;
+		q0 = t->q0+1;
+		li = 1;
+		while(q0<t->file->b.nc) {
+			if(runeclass(textreadc(t, q0-1))==RCNEWLINE)
+				li++;
+			if(li>6) break;
+			q0++;
+		}
+		textshow(t, q0, q0, TRUE);
+		return;
+ 	case Kcmd+'h': // one line left
+ 		typecommit(t);
+ 		if(t->q0<=0) return;
+ 		q0 = t->q0-1;
+ 		while(q0>0) {
+ 			if(runeclass(textreadc(t, q0))==RCNEWLINE || runeclass(textreadc(t, q0-1))==RCNEWLINE)
+ 				break;
+ 			q0--;
+ 		}
+ 		textshow(t, q0, q0, TRUE);
+ 		return;
+ 	case Kcmd+'l': // one line right
+ 		typecommit(t);
+ 		if(t->q0>=t->file->b.nc) return;
+ 		q0 = t->q0+1;
+ 		while(q0<t->file->b.nc) {
+ 			if(runeclass(textreadc(t, q0))==RCNEWLINE || runeclass(textreadc(t, q0-1))==RCNEWLINE)
+ 				break;
+ 			q0++;
+ 		}
+ 		textshow(t, q0, q0, TRUE);
+ 		return;
+ 	case Kcmd+'j': // one word left
+ 		typecommit(t);
+ 		if(t->q0<=0) return;
+		q0 = t->q0-1;
+ 		while(q0>0 && runeclass(textreadc(t, q0))==runeclass(textreadc(t, q0-1)))
+ 			q0--;
+ 		textshow(t, q0, q0, TRUE);
+ 		return;
+ 	case Kcmd+'k':  // one word right
+ 		typecommit(t);
+ 		if(t->q0>=t->file->b.nc) return;
+ 		q0 = t->q0+1;
+ 		while(q0<t->file->b.nc && runeclass(textreadc(t, q0))==runeclass(textreadc(t, q0-1)))
+ 			q0++;
+ 		textshow(t, q0, q0, TRUE);
+ 		return;
 	case Kcmd+'c': // copy
 		typecommit(t);
 		cut(t, t, nil, TRUE, FALSE, nil, 0);
