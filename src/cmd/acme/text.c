@@ -593,8 +593,8 @@ textcomplete(Text *t)
 	char *s, *dirs;
 	Runestr dir;
 
-	/* control-f: filename completion; works back to white space or / */
-	if(t->q0<t->file->b.nc && textreadc(t, t->q0)>' ')	/* must be at end of word */
+	// filename completion; works back to white space or /
+	if(t->q0<t->file->b.nc && textreadc(t, t->q0)>' ') // must be at end of word
 		return nil;
 	nstr = textfilewidth(t, t->q0, TRUE);
 	str = runemalloc(nstr);
@@ -831,7 +831,7 @@ texttype(Text *t, Rune r)
 	}
 	textshow(t, t->q0, t->q0, 1);
 	switch(r){
-	case 0x06:	/* ^F: complete */
+	case Kcmd+'g': // complete
 	case Kins:
 		typecommit(t);
 		rp = textcomplete(t);
