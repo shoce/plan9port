@@ -762,6 +762,16 @@ texttype(Text *t, Rune r)
 			q0++;
 		textshow(t, q0, q0, TRUE);
 		return;
+	case Kcmd+Kshift+'u': // begin
+	case '':
+		typecommit(t);
+		textshow(t, 0, 0, TRUE);
+		return;
+	case Kcmd+Kshift+'i': // cursor end
+	case '':
+		typecommit(t);
+		textshow(t, t->file->b.nc, t->file->b.nc, TRUE);
+		return;
 	case Kcmd+'c': // copy
 		typecommit(t);
 		cut(t, t, nil, TRUE, FALSE, nil, 0);
