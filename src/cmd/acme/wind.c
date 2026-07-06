@@ -517,7 +517,7 @@ winsettag1(Window *w)
 			i += 4;
 		}
 	}
-	if(w->isdir){
+	if(1 || w->isdir){
 		runemove(new+i, Lget, 4);
 		i += 4;
 	}
