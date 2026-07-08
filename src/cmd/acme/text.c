@@ -989,6 +989,22 @@ texttype(Text *t, Rune r)
 		typecommit(t);
 		new(t, t, nil, 0, 0, nil, 0);
 		return;
+	case Kcmd+'\\': // join
+		typecommit(t);
+		int q0 = t->q0;
+		while(q0<t->file->b.nc && textreadc(t, q0)!='\n')
+			q0++;
+		if(q0>=t->file->b.nc)
+			return;
+		int q1 = q0+1;
+		while(q0>0 && runeclass(textreadc(t, q0-1))==RCSPACE)
+			q0--;
+		while(q1<t->file->b.nc-1 && runeclass(textreadc(t, q1))==RCSPACE)
+			q1++;
+		textdelete(t, q0, q1, TRUE);
+		Rune srr[] = {' ', 0};
+		textinsert(t, q0, srr, 1, TRUE);
+		return;
 	case '\n':
 		if(t->w->autoindent){
 			/* find beginning of previous line using backspace code */
@@ -1764,3 +1780,4 @@ textreset(Text *t)
 	filereset(t->file);
 	bufreset(&t->file->b);
 }
+
