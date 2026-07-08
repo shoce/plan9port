@@ -887,6 +887,11 @@ texttype(Text *t, Rune r)
 			textfill(t->file->text[i]);
 		t->iq1 = t->q0;
 		return;
+	case Kcmd+'3': // font
+	case Kcmd+'4':
+		typecommit(t);
+		fontx(&t->w->body, nil, nil, FALSE, XXX, nil, 0);
+		return;
 	case '\n':
 		if(t->w->autoindent){
 			/* find beginning of previous line using backspace code */
